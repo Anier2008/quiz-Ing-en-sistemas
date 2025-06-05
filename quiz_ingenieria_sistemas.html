@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quiz de Ingeniería de Sistemas</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    .oculto { display: none; }
+    .pregunta { font-weight: bold; margin-top: 20px; }
+    .opcion { margin: 5px 0; }
+    .feedback { margin-top: 10px; }
+    .feedback.correcto { color: green; }
+    .feedback.incorrecto { color: red; }
+    button { padding: 10px 20px; margin-top: 10px; }
+    button:disabled { background: gray; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+<div id="pantalla-inicio">
+  <h1>Bienvenido al Quiz</h1>
+  <button id="btnEmpezarJuego">Empezar</button>
+</div>
+
+<div id="contenedor-quiz" class="oculto">
+  <h1>Quiz de Ingeniería de Sistemas</h1>
+  <div class="pregunta" id="pregunta"></div>
+  <div id="opciones"></div>
+  <button id="btnSiguiente" onclick="verificarRespuesta()">Siguiente</button>
+  <div id="feedback" class="feedback"></div>
+  <div id="puntaje">Puntaje: 0</div>
+</div>
+
+<script>
+
+const datosQuiz = [
+  {
+    pregunta: "¿Qué es un sistema operativo?",
+    opciones: ["Software de entretenimiento", "Software de programación", "Software de sistema", "Ninguna de las anteriores"],
+    correcta: "c"
+  },
+  {
+    pregunta: "¿Cuál es el lenguaje más usado para desarrollo web?",
+    opciones: ["Python", "JavaScript", "C#", "Ruby"],
+    correcta: "b"
+  },
+  {
+    pregunta: "¿Qué es un algoritmo?",
+    opciones: ["Una función matemática", "Una secuencia de instrucciones", "Una variable", "Una constante"],
+    correcta: "b"
+  },
+  {
+    pregunta: "¿Qué componente se encarga de ejecutar las instrucciones en un computador?",
+    opciones: ["RAM", "Disco duro", "CPU", "GPU"],
+    correcta: "c"
+  },
+  {
+    pregunta: "¿Qué representa un diagrama de flujo?",
+    opciones: ["Estructura de datos", "Esquema de red", "Secuencia lógica de un proceso", "Base de datos"],
+    correcta: "c"
+  },
+  // ... Aquí continuarían las demás 95 preguntas ...
+];
+
+
+let indice = 0;
+let puntaje = 0;
+let seleccionada = null;
+
+const pantallaInicio = document.getElementById('pantalla-inicio');
+const contenedorQuiz = document.getElementById('contenedor-quiz');
+const btnEmpezarJuego = document.getElementById('btnEmpezarJuego');
+const preguntaEl = document.getElementById("pregunta");
+const opcionesDiv = document.getElementById("opciones");
+const btnSiguiente = document.getElementById("btnSiguiente");
+const feedbackEl = document.getElementById("feedback");
+const puntajeEl = document.getElementById("puntaje");
+
+function cargarPregunta() {
+  feedbackEl.textContent = "";
+  feedbackEl.className = "feedback";
+  const preguntaActual = datosQuiz[indice];
+  preguntaEl.textContent = `${indice + 1}. ${preguntaActual.pregunta}`;
+  opcionesDiv.innerHTML = "";
+
+  preguntaActual.opciones.forEach((opcion, i) => {
+    const letra = "abcd"[i];
+    const div = document.createElement("div");
+    div.classList.add("opcion");
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "opcion";
+    input.value = letra;
+    input.id = `opcion-${letra}`;
+    input.onclick = () => {
+      seleccionada = input;
+      btnSiguiente.disabled = false;
+    };
+    const label = document.createElement("label");
+    label.htmlFor = `opcion-${letra}`;
+    label.textContent = `${letra}) ${opcion}`;
+    div.appendChild(input);
+    div.appendChild(label);
+    opcionesDiv.appendChild(div);
+  });
+
+  btnSiguiente.disabled = true;
+  btnSiguiente.style.display = 'block';
+}
+
+function verificarRespuesta() {
+  if (!seleccionada) return;
+  const respuesta = seleccionada.value;
+  const correcta = datosQuiz[indice].correcta;
+
+  if (respuesta === correcta) {
+    puntaje++;
+    feedbackEl.textContent = "✅ ¡Correcto!";
+    feedbackEl.className = "feedback correcto";
+  } else {
+    const textoCorrecto = datosQuiz[indice].opciones["abcd".indexOf(correcta)];
+    feedbackEl.textContent = `❌ Incorrecto. La respuesta correcta era: ${textoCorrecto}`;
+    feedbackEl.className = "feedback incorrecto";
+  }
+
+  puntajeEl.textContent = `Puntaje: ${puntaje}`;
+  btnSiguiente.disabled = true;
+  seleccionada = null;
+  indice++;
+
+  if (indice < datosQuiz.length) {
+    setTimeout(cargarPregunta, 1500);
+  } else {
+    setTimeout(() => {
+      preguntaEl.textContent = "🎯 Quiz terminado.";
+      opcionesDiv.innerHTML = "";
+      btnSiguiente.style.display = 'none';
+      puntajeEl.textContent = `Tu puntaje final es: ${puntaje} de ${datosQuiz.length}`;
+      feedbackEl.textContent = "¡Gracias por jugar!";
+      feedbackEl.className = "feedback";
+    }, 1500);
+  }
+}
+
+btnEmpezarJuego.addEventListener('click', () => {
+  pantallaInicio.classList.add('oculto');
+  contenedorQuiz.classList.remove('oculto');
+  puntaje = 0;
+  indice = 0;
+  puntajeEl.textContent = `Puntaje: ${puntaje}`;
+  cargarPregunta();
+});
+</script>
+
+</body>
+</html>
