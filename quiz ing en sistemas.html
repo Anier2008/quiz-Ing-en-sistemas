@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quiz de Ingeniería de Sistemas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    /* ... (igual que tu CSS original, puedes copiarlo aquí) ... */
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg, #6366f1 0%, #818cf8 100%);
+      color: #222;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .header-quiz {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 0 12px 0;
+      background: rgba(255,255,255,0.15);
+      border-bottom: 2px solid #6366f1;
+      box-shadow: 0 2px 12px rgba(80,80,160,0.07);
+      margin-bottom: 18px;
+    }
+    .logo-quiz {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 8px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(80,80,160,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+    .logo-quiz:hover {
+      transform: scale(1.08) rotate(-6deg);
+      box-shadow: 0 4px 16px rgba(80,80,160,0.18);
+    }
+    .titulo-quiz {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #3737a1;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px #e0e7ff;
+      margin: 0;
+      text-align: center;
+    }
+    #pantalla-inicio, #pantalla-config, #contenedor-quiz, #guia-estudio {
+      max-width: 440px;
+      margin: 40px auto;
+      padding: 32px 24px 24px 24px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 24px rgba(80,80,160,0.13), 0 1.5px 6px rgba(80,80,160,0.09);
+      transition: box-shadow 0.3s;
+      position: relative;
+      z-index: 1;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 18px;
+      color: #3b3b7a;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .pregunta {
+      font-size: 1.18rem;
+      margin-bottom: 18px;
+      font-weight: 600;
+      color: #2d2d5a;
+      text-shadow: 0 1px 0 #e0e7ff;
+    }
+    #opciones {
+      margin-bottom: 18px;
+    }
+    .opcion {
+      margin: 10px 0;
+      padding: 0;
+      border-radius: 8px;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 1px 4px rgba(80,80,160,0.06);
+      background: #f5f7ff;
+    }
+    .opcion input[type="radio"] {
+      accent-color: #4f46e5;
+      margin-right: 10px;
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+    .opcion label {
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 8px;
+      width: 100%;
+      transition: background 0.2s, color 0.2s;
+      font-size: 1rem;
+      display: block;
+    }
+    .opcion:hover label, .opcion input[type="radio"]:focus + label {
+      background: #e0e7ff;
+      color: #3737a1;
+    }
+    .opcion input[type="radio"]:checked + label {
+      background: linear-gradient(90deg, #6366f1 60%, #818cf8 100%);
+      color: #fff;
+      font-weight: 700;
+      text-shadow: 0 1px 4px #3737a1;
+    }
+    button {
+      padding: 14px 28px;
+      margin-top: 10px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #6366f1 60%, #818cf8 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(80,80,160,0.11);
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+      display: block;
+      width: 100%;
+      letter-spacing: 0.5px;
+    }
+    button:hover:not(:disabled) {
+      background: linear-gradient(90deg, #818cf8 60%, #6366f1 100%);
+      box-shadow: 0 4px 16px rgba(80,80,160,0.18);
+      transform: translateY(-2px) scale(1.03);
+    }
+    button:disabled {
+      background: #c7d2fe;
+      color: #888;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .feedback {
+      margin-top: 14px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      min-height: 28px;
+      text-align: center;
+      transition: color 0.2s;
+    }
+    .feedback.correcto {
+      color: #16a34a;
+      animation: correctoAnim 0.5s;
+    }
+    .feedback.incorrecto {
+      color: #dc2626;
+      animation: incorrectoAnim 0.5s;
+    }
+    @keyframes correctoAnim {
+      0% { transform: scale(1.2);}
+      100% { transform: scale(1);}
+    }
+    @keyframes incorrectoAnim {
+      0% { transform: scale(1.2);}
+      100% { transform: scale(1);}
+    }
+    #puntaje {
+      margin-top: 18px;
+      font-size: 1.08rem;
+      text-align: right;
+      color: #6366f1;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .oculto {
+      display: none;
+    }
+    .progress-container {
+      background: #e0e7ff;
+      border-radius: 8px;
+      height: 16px;
+      margin-bottom: 22px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(80,80,160,0.06);
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1 60%, #818cf8 100%);
+      width: 0%;
+      transition: width 0.4s;
+    }
+    .config-group {
+      margin: 18px 0;
+    }
+    .config-label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+      color: #3b3b7a;
+      letter-spacing: 0.2px;
+    }
+    select, input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 7px;
+      border: 1.5px solid #c7d2fe;
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      box-sizing: border-box;
+      background: #f5f7ff;
+      color: #3737a1;
+      font-weight: 500;
+      outline: none;
+      transition: border 0.2s;
+    }
+    select:focus, input[type="number"]:focus {
+      border: 1.5px solid #6366f1;
+      background: #e0e7ff;
+    }
+    #btnMenu, #btnGuia {
+      margin-top: 18px;
+      width: 48%;
+      display: inline-block;
+      font-size: 1rem;
+      padding: 12px 0;
+    }
+    #btnMenu {
+      margin-right: 2%;
+    }
+    #btnCerrarGuia {
+      margin-top: 18px;
+      width: 100%;
+      font-size: 1rem;
+      padding: 12px 0;
+      background: #818cf8;
+    }
+    #guia-estudio {
+      display: none;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .guia-pregunta {
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e7ff;
+    }
+    .guia-pregunta strong {
+      color: #3737a1;
+    }
+    .guia-respuesta {
+      color: #16a34a;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+    @media (max-width: 600px) {
+      #btnMenu, #btnGuia {
+        width: 100%;
+        margin: 8px 0 0 0;
+        display: block;
+      }
+    }
+    /* Nuevo: botón guía en inicio */
+    #btnGuiaInicio {
+      margin-top: 10px;
+      font-size: 1.1rem;
+      padding: 14px 0;
+      width: 100%;
+      background: linear-gradient(90deg, #818cf8 60%, #6366f1 100%);
+    }
+  </style>
+</head>
+<body>
+  <div class="header-quiz">
+    <div class="logo-quiz">
+      <!-- Logo SVG de ejemplo, puedes reemplazarlo por tu propio logo -->
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="22" fill="#6366f1" stroke="#818cf8" stroke-width="4"/>
+        <path d="M24 14L32 34H16L24 14Z" fill="#fff" stroke="#3737a1" stroke-width="2"/>
+        <circle cx="24" cy="26" r="3.5" fill="#6366f1" stroke="#3737a1" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="titulo-quiz">Quiz de Ingeniería de Sistemas</div>
+  </div>
+  <div id="pantalla-inicio">
+    <h1>Bienvenido al Quiz de Ingeniería de Sistemas</h1>
+    <button id="btnConfigurar">¡Comenzar!</button>
+    <button id="btnGuiaInicio">Guía de estudio</button>
+  </div>
+  <div id="pantalla-config" class="oculto">
+    <h1>Configura tu Quiz</h1>
+    <form id="formConfig">
+      <div class="config-group">
+        <label class="config-label" for="nivel">Nivel de dificultad:</label>
+        <select id="nivel" required>
+          <option value="facil">Fácil</option>
+          <option value="medio">Medio</option>
+          <option value="dificil">Difícil</option>
+        </select>
+      </div>
+      <div class="config-group">
+        <label class="config-label" for="cantidad">Cantidad de preguntas:</label>
+        <input type="number" id="cantidad" min="5" max="100" value="10" required>
+        <small id="maxPreguntasInfo" style="color:#6366f1;"></small>
+      </div>
+      <button type="submit">Comenzar Quiz</button>
+    </form>
+  </div>
+  <div id="contenedor-quiz" class="oculto">
+    <h1>Quiz de Ingeniería de Sistemas</h1>
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="pregunta" id="pregunta"></div>
+    <div id="opciones"></div>
+    <button id="btnSiguiente" onclick="verificarRespuesta()">Responder</button>
+    <div id="feedback" class="feedback"></div>
+    <div id="puntaje">Puntaje: 0</div>
+    <div id="final-buttons" style="display:none;">
+      <button id="btnMenu">Volver al menú</button>
+      <button id="btnGuia">Guía de estudio</button>
+    </div>
+  </div>
+  <div id="guia-estudio" class="oculto">
+    <h1>Guía de Estudio</h1>
+    <div id="guia-lista"></div>
+    <button id="btnCerrarGuia">Cerrar guía</button>
+  </div>
+  <script>
+    // 100 preguntas variadas de Ingeniería en Sistemas
+    // 34 fáciles, 33 medias, 33 difíciles
+    const preguntasPorNivel = {
+      facil: [
+        { pregunta: "¿Qué es un sistema operativo?", opciones: ["Software de entretenimiento", "Software de programación", "Software de sistema", "Ninguna de las anteriores"], correcta: "c" },
+        { pregunta: "¿Qué significa HTML?", opciones: ["HyperText Markup Language", "HighText Machine Language", "HyperTabular Markup Language", "None of these"], correcta: "a" },
+        { pregunta: "¿Qué componente almacena datos de manera temporal en un computador?", opciones: ["CPU", "RAM", "Disco duro", "Fuente de poder"], correcta: "b" },
+        { pregunta: "¿Qué es una red LAN?", opciones: ["Red de área local", "Red de área amplia", "Red inalámbrica", "Red de área personal"], correcta: "a" },
+        { pregunta: "¿Qué es un bit?", opciones: ["Unidad de almacenamiento", "Unidad de procesamiento", "Unidad de velocidad", "Unidad de corriente"], correcta: "a" },
+        { pregunta: "¿Qué es un diodo?", opciones: ["Un componente que permite el paso de corriente en un solo sentido", "Un amplificador", "Un sensor de temperatura", "Un tipo de memoria"], correcta: "a" },
+        { pregunta: "¿Qué significa CPU?", opciones: ["Central Processing Unit", "Computer Personal Unit", "Central Programming Unit", "Control Processing Unit"], correcta: "a" },
+        { pregunta: "¿Qué es CAD en ingeniería?", opciones: ["Diseño asistido por computadora", "Control automático digital", "Análisis estructural", "Mecanizado"], correcta: "a" },
+        { pregunta: "¿Qué es una base de datos?", opciones: ["Un programa de edición", "Un conjunto de datos organizados", "Un lenguaje de programación", "Un sistema operativo"], correcta: "b" },
+        { pregunta: "¿Qué es un algoritmo?", opciones: ["Un lenguaje de programación", "Un conjunto de instrucciones ordenadas", "Un tipo de hardware", "Un sistema operativo"], correcta: "b" },
+        { pregunta: "¿Qué es un router?", opciones: ["Un dispositivo de red", "Un tipo de software", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la RAM?", opciones: ["Memoria de solo lectura", "Memoria de acceso aleatorio", "Procesador", "Disco duro"], correcta: "b" },
+        { pregunta: "¿Qué es un firewall?", opciones: ["Un dispositivo de almacenamiento", "Un sistema de protección de red", "Un tipo de software de edición", "Un protocolo de comunicación"], correcta: "b" },
+        { pregunta: "¿Qué es un backup?", opciones: ["Un virus", "Una copia de seguridad", "Un tipo de red", "Un lenguaje de programación"], correcta: "b" },
+        { pregunta: "¿Qué es una IP?", opciones: ["Un número que identifica un dispositivo en la red", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un switch?", opciones: ["Un dispositivo de red", "Un tipo de software", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un bug?", opciones: ["Un error en el software", "Un tipo de hardware", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es una URL?", opciones: ["Una dirección web", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un navegador web?", opciones: ["Un programa para navegar por internet", "Un tipo de hardware", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un archivo ejecutable?", opciones: ["Un archivo que puede ser ejecutado por el sistema", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un dominio?", opciones: ["Un nombre que identifica un sitio web", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un servidor?", opciones: ["Un dispositivo que provee servicios en red", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un cliente?", opciones: ["Un dispositivo que solicita servicios en red", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un sistema embebido?", opciones: ["Un sistema dedicado a una función específica", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un compilador?", opciones: ["Un programa que traduce código fuente a código máquina", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un bit?", opciones: ["La unidad mínima de información", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un byte?", opciones: ["8 bits", "16 bits", "32 bits", "64 bits"], correcta: "a" },
+        { pregunta: "¿Qué es un sistema binario?", opciones: ["Sistema de numeración base 2", "Sistema de numeración base 10", "Sistema de numeración base 8", "Sistema de numeración base 16"], correcta: "a" },
+        { pregunta: "¿Qué es un sistema hexadecimal?", opciones: ["Sistema de numeración base 16", "Sistema de numeración base 10", "Sistema de numeración base 8", "Sistema de numeración base 2"], correcta: "a" },
+        { pregunta: "¿Qué es un disco duro?", opciones: ["Dispositivo de almacenamiento", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un SSD?", opciones: ["Unidad de estado sólido", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la nube (cloud)?", opciones: ["Servicios y almacenamiento en internet", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un sistema de archivos?", opciones: ["Método para organizar y almacenar archivos", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es una impresora?", opciones: ["Dispositivo de salida", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un mouse?", opciones: ["Dispositivo de entrada", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" }
+      ],
+      medio: [
+        { pregunta: "¿Cuál es el lenguaje más usado para desarrollo web?", opciones: ["Python", "JavaScript", "C#", "Ruby"], correcta: "b" },
+        { pregunta: "¿Qué es un transistor?", opciones: ["Una resistencia", "Un amplificador", "Un interruptor controlado", "Un diodo"], correcta: "c" },
+        { pregunta: "¿Qué ley relaciona voltaje, corriente y resistencia?", opciones: ["Ley de Ohm", "Ley de Newton", "Ley de Faraday", "Ley de Joule"], correcta: "a" },
+        { pregunta: "¿Qué lenguaje se usa comúnmente para programar microcontroladores?", opciones: ["Python", "Java", "C", "PHP"], correcta: "c" },
+        { pregunta: "¿Qué unidad mide la resistencia eléctrica?", opciones: ["Voltios", "Amperios", "Ohmios", "Julios"], correcta: "c" },
+        { pregunta: "¿Qué tipo de puente se usa para medir resistencia?", opciones: ["Wheatstone", "Maxwell", "Coulomb", "Tesla"], correcta: "a" },
+        { pregunta: "¿Cuál es la función principal de una válvula en hidráulica?", opciones: ["Medir presión", "Controlar flujo", "Generar calor", "Regular voltaje"], correcta: "b" },
+        { pregunta: "¿Qué es un PLC?", opciones: ["Sistema de control manual", "Controlador lógico programable", "Sensor de presión", "Motor eléctrico"], correcta: "b" },
+        { pregunta: "¿Qué es un protocolo de red?", opciones: ["Conjunto de reglas para comunicación", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es una topología de red?", opciones: ["Forma en que se conectan los dispositivos", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un DNS?", opciones: ["Sistema de nombres de dominio", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es una API?", opciones: ["Interfaz de programación de aplicaciones", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un IDE?", opciones: ["Entorno de desarrollo integrado", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un framework?", opciones: ["Conjunto de herramientas para desarrollo", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un microprocesador?", opciones: ["Unidad central de procesamiento", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un sistema distribuido?", opciones: ["Sistema con componentes en diferentes ubicaciones", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un balanceador de carga?", opciones: ["Dispositivo que distribuye tráfico", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un RAID?", opciones: ["Conjunto de discos para redundancia", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un backup incremental?", opciones: ["Copia solo los cambios desde el último backup", "Copia todo", "No copia nada", "Copia solo archivos grandes"], correcta: "a" },
+        { pregunta: "¿Qué es un sistema operativo de tiempo real?", opciones: ["Responde en tiempo determinado", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un kernel?", opciones: ["Núcleo del sistema operativo", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es una VPN?", opciones: ["Red privada virtual", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un ataque DDoS?", opciones: ["Ataque de denegación de servicio distribuido", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un hash?", opciones: ["Función que transforma datos en valores únicos", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un token?", opciones: ["Elemento de autenticación", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un commit en Git?", opciones: ["Guardar cambios en el repositorio", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un branch en Git?", opciones: ["Rama de desarrollo", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un pull request?", opciones: ["Solicitud para fusionar cambios", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un bug tracker?", opciones: ["Herramienta para seguimiento de errores", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un test unitario?", opciones: ["Prueba de una parte pequeña del código", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es integración continua?", opciones: ["Práctica de integrar cambios frecuentemente", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un contenedor (Docker)?", opciones: ["Entorno aislado para ejecutar aplicaciones", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un microservicio?", opciones: ["Arquitectura de servicios pequeños e independientes", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" }
+      ],
+      dificil: [
+        { pregunta: "¿Cuál es la función de un compilador?", opciones: ["Ejecutar programas", "Traducir código fuente a código máquina", "Almacenar datos", "Controlar hardware"], correcta: "b" },
+        { pregunta: "¿Qué es la virtualización?", opciones: ["Crear versiones virtuales de recursos", "Aumentar la velocidad del hardware", "Reducir el consumo eléctrico", "Mejorar la seguridad física"], correcta: "a" },
+        { pregunta: "¿Cuál es la capa más baja del modelo OSI?", opciones: ["Capa de aplicación", "Capa de presentación", "Capa física", "Capa de red"], correcta: "c" },
+        { pregunta: "¿Qué es la arquitectura cliente-servidor?", opciones: ["Un modelo de red donde los clientes solicitan servicios a servidores", "Un tipo de hardware", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un sistema experto?", opciones: ["Sistema que simula el conocimiento humano", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la normalización en bases de datos?", opciones: ["Proceso para reducir redundancia", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es ACID en bases de datos?", opciones: ["Propiedades de transacciones", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un deadlock?", opciones: ["Bloqueo mutuo entre procesos", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un árbol binario?", opciones: ["Estructura de datos jerárquica", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un grafo dirigido?", opciones: ["Conjunto de nodos y aristas con dirección", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la recursividad?", opciones: ["Función que se llama a sí misma", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la complejidad algorítmica?", opciones: ["Medida de recursos usados por un algoritmo", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un ataque de phishing?", opciones: ["Suplantación de identidad para robar datos", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un certificado SSL?", opciones: ["Protocolo de seguridad para sitios web", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un balanceador de carga L7?", opciones: ["Balancea tráfico a nivel de aplicación", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un sistema de archivos distribuido?", opciones: ["Almacena archivos en varios nodos", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un algoritmo de búsqueda binaria?", opciones: ["Busca en listas ordenadas dividiendo a la mitad", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un algoritmo de ordenamiento rápido (quicksort)?", opciones: ["Divide y conquista para ordenar", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un sistema de control de versiones distribuido?", opciones: ["Permite múltiples copias del repositorio", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la encapsulación en POO?", opciones: ["Ocultar detalles internos de un objeto", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la herencia en POO?", opciones: ["Permite crear nuevas clases a partir de otras", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la polimorfismo en POO?", opciones: ["Objetos pueden tomar muchas formas", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la concurrencia?", opciones: ["Ejecución de varios procesos al mismo tiempo", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un hilo (thread)?", opciones: ["Unidad de ejecución dentro de un proceso", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un proceso?", opciones: ["Programa en ejecución", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la memoria caché?", opciones: ["Memoria rápida para datos frecuentes", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la paginación en memoria?", opciones: ["División de memoria en bloques", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es un sistema operativo multitarea?", opciones: ["Permite ejecutar varios procesos a la vez", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la virtual memory?", opciones: ["Simula más memoria de la que hay físicamente", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es la inteligencia artificial?", opciones: ["Simulación de inteligencia humana por máquinas", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" },
+        { pregunta: "¿Qué es el aprendizaje supervisado?", opciones: ["Entrenamiento con datos etiquetados", "Un tipo de memoria", "Un lenguaje de programación", "Un sistema operativo"], correcta: "a" }
+      ]
+    };
+
+    // Variables globales
+    let preguntasSeleccionadas = [];
+    let indice = 0;
+    let puntaje = 0;
+    let totalPreguntas = 10;
+
+    // Elementos DOM
+    const pantallaInicio = document.getElementById('pantalla-inicio');
+    const pantallaConfig = document.getElementById('pantalla-config');
+    const contenedorQuiz = document.getElementById('contenedor-quiz');
+    const btnConfigurar = document.getElementById('btnConfigurar');
+    const btnGuiaInicio = document.getElementById('btnGuiaInicio');
+    const formConfig = document.getElementById('formConfig');
+    const nivelSelect = document.getElementById('nivel');
+    const cantidadInput = document.getElementById('cantidad');
+    const maxPreguntasInfo = document.getElementById('maxPreguntasInfo');
+    const preguntaEl = document.getElementById("pregunta");
+    const opcionesDiv = document.getElementById("opciones");
+    const btnSiguiente = document.getElementById("btnSiguiente");
+    const feedbackEl = document.getElementById("feedback");
+    const puntajeEl = document.getElementById("puntaje");
+    const progressBar = document.getElementById("progressBar");
+    const finalButtons = document.getElementById("final-buttons");
+    const btnMenu = document.getElementById("btnMenu");
+    const btnGuia = document.getElementById("btnGuia");
+    const guiaEstudio = document.getElementById("guia-estudio");
+    const guiaLista = document.getElementById("guia-lista");
+    const btnCerrarGuia = document.getElementById("btnCerrarGuia");
+
+    let seleccionada = null;
+
+    // Mostrar máximo de preguntas según nivel
+    function actualizarMaxPreguntas() {
+      const nivel = nivelSelect.value;
+      const max = preguntasPorNivel[nivel].length;
+      cantidadInput.max = max;
+      if (parseInt(cantidadInput.value) > max) cantidadInput.value = max;
+      maxPreguntasInfo.textContent = `Máximo: ${max}`;
+    }
+    nivelSelect.addEventListener('change', actualizarMaxPreguntas);
+
+    // Pantalla de configuración
+    btnConfigurar.addEventListener('click', () => {
+      pantallaInicio.classList.add('oculto');
+      pantallaConfig.classList.remove('oculto');
+      actualizarMaxPreguntas();
+    });
+
+    // Botón guía de estudio en inicio
+    btnGuiaInicio.addEventListener('click', () => {
+      guiaEstudio.style.display = 'block';
+      pantallaInicio.classList.add('oculto');
+      pantallaConfig.classList.add('oculto');
+      contenedorQuiz.classList.add('oculto');
+      mostrarGuia();
+    });
+
+    // Iniciar quiz con configuración
+    formConfig.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nivel = nivelSelect.value;
+      totalPreguntas = Math.max(5, Math.min(parseInt(cantidadInput.value), preguntasPorNivel[nivel].length));
+      // Seleccionar aleatoriamente las preguntas del nivel
+      preguntasSeleccionadas = preguntasPorNivel[nivel].slice().sort(() => 0.5 - Math.random()).slice(0, totalPreguntas);
+      indice = 0;
+      puntaje = 0;
+      pantallaConfig.classList.add('oculto');
+      contenedorQuiz.classList.remove('oculto');
+      puntajeEl.textContent = `Puntaje: ${puntaje}`;
+      btnSiguiente.style.display = 'block';
+      finalButtons.style.display = 'none';
+      cargarPregunta();
+    });
+
+    function actualizarBarraProgreso() {
+      const total = preguntasSeleccionadas.length;
+      const actual = Math.min(indice, total);
+      const porcentaje = total > 0 ? (actual / total) * 100 : 0;
+      progressBar.style.width = porcentaje + "%";
+    }
+
+    function cargarPregunta() {
+      feedbackEl.textContent = "";
+      feedbackEl.className = "feedback";
+      const preguntaActual = preguntasSeleccionadas[indice];
+      preguntaEl.textContent = `${indice + 1}. ${preguntaActual.pregunta}`;
+      opcionesDiv.innerHTML = "";
+      seleccionada = null;
+      preguntaActual.opciones.forEach((opcion, i) => {
+        const letra = "abcd"[i];
+        const div = document.createElement("div");
+        div.classList.add("opcion");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "opcion";
+        input.value = letra;
+        input.id = `opcion-${letra}`;
+        input.onclick = () => {
+          seleccionada = input;
+          btnSiguiente.disabled = false;
+        };
+        const label = document.createElement("label");
+        label.htmlFor = `opcion-${letra}`;
+        label.textContent = `${letra}) ${opcion}`;
+        div.appendChild(input);
+        div.appendChild(label);
+        opcionesDiv.appendChild(div);
+      });
+      btnSiguiente.disabled = true;
+      btnSiguiente.textContent = "Responder";
+      actualizarBarraProgreso();
+      // Focus en la primera opción
+      const firstRadio = opcionesDiv.querySelector('input[type="radio"]');
+      if (firstRadio) firstRadio.focus();
+    }
+
+    function verificarRespuesta() {
+      if (!seleccionada) return;
+      const respuesta = seleccionada.value;
+      const correcta = preguntasSeleccionadas[indice].correcta;
+      // Deshabilitar radios
+      opcionesDiv.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
+      if (respuesta === correcta) {
+        puntaje++;
+        feedbackEl.textContent = "✅ ¡Correcto!";
+        feedbackEl.className = "feedback correcto";
+      } else {
+        const textoCorrecto = preguntasSeleccionadas[indice].opciones["abcd".indexOf(correcta)];
+        feedbackEl.textContent = `❌ Incorrecto. La respuesta correcta era: ${textoCorrecto}`;
+        feedbackEl.className = "feedback incorrecto";
+      }
+      puntajeEl.textContent = `Puntaje: ${puntaje}`;
+      btnSiguiente.disabled = true;
+      indice++;
+      actualizarBarraProgreso();
+      if (indice < preguntasSeleccionadas.length) {
+        setTimeout(() => {
+          cargarPregunta();
+        }, 1500);
+      } else {
+        setTimeout(() => {
+          preguntaEl.textContent = "🎯 Quiz terminado.";
+          opcionesDiv.innerHTML = "";
+          btnSiguiente.style.display = 'none';
+          progressBar.style.width = "100%";
+          puntajeEl.textContent = `Tu puntaje final es: ${puntaje} de ${preguntasSeleccionadas.length}`;
+          feedbackEl.textContent = "¡Gracias por jugar!";
+          feedbackEl.className = "feedback";
+          finalButtons.style.display = 'block';
+        }, 1500);
+      }
+    }
+
+    // Botón volver al menú
+    btnMenu.addEventListener('click', () => {
+      contenedorQuiz.classList.add('oculto');
+      pantallaInicio.classList.remove('oculto');
+      finalButtons.style.display = 'none';
+    });
+
+    // Botón guía de estudio al final del quiz
+    btnGuia.addEventListener('click', () => {
+      guiaEstudio.style.display = 'block';
+      contenedorQuiz.classList.add('oculto');
+      pantallaConfig.classList.add('oculto');
+      pantallaInicio.classList.add('oculto');
+      mostrarGuia();
+    });
+
+    // Botón cerrar guía
+    btnCerrarGuia.addEventListener('click', () => {
+      guiaEstudio.style.display = 'none';
+      pantallaInicio.classList.remove('oculto');
+    });
+
+    // Mostrar guía de estudio
+    function mostrarGuia() {
+      guiaLista.innerHTML = '';
+      // Unir todas las preguntas de todos los niveles
+      const niveles = ['facil', 'medio', 'dificil'];
+      let todas = [];
+      niveles.forEach(nivel => {
+        preguntasPorNivel[nivel].forEach(p => todas.push({ ...p, nivel }));
+      });
+      todas.forEach((p, idx) => {
+        const div = document.createElement('div');
+        div.className = 'guia-pregunta';
+        div.innerHTML = `<strong>${idx + 1}. [${p.nivel.toUpperCase()}]</strong> ${p.pregunta}<br>
+          <span>Opciones: ${p.opciones.map((op, i) => `<b>${"abcd"[i]})</b> ${op}`).join(' | ')}</span>
+          <div class="guia-respuesta">Respuesta correcta: <b>${"abcd"[ "abcd".indexOf(p.correcta) ]})</b> ${p.opciones["abcd".indexOf(p.correcta)]}</div>`;
+        guiaLista.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
